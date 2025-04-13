@@ -11,13 +11,13 @@ const Toaster = () => {
 
   return (
     <div className="fixed bottom-2 right-2 z-50">
-      <ul className="relative">
+      <ul className="relative flex flex-col-reverse gap-2">
         {toasts.map((toast: ToastT, index: number) => (
           <li
             key={toast.id}
-            className="absolute right-2 bottom-2 animate-toast-in transition-transform duration-200 ease-in-out shadow-lg"
+            className="absolute right-0 bottom-0"
             style={{
-              transform: `translateY(${-index * 0.4}rem)`,
+              transform: `translateY(${-index * 0.5}rem)`,
               zIndex: toasts.length - index,
             }}
           >

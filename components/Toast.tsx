@@ -6,11 +6,11 @@ import {
   CheckCircleIcon,
   X,
 } from "lucide-react";
-import { ToastT, ToastType } from "../types/types";
+import type { ToastT, ToastType } from "../types/types";
 import { useToast } from "../providers/ToastProvider";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const TOAST_TIMER = 30000;
+const TOAST_TIMER = 5000;
 
 export function getIcon(type: ToastType) {
   switch (type) {
@@ -35,14 +35,19 @@ const Toast = ({
 }: ToastT) => {
   const toastRef = useRef<HTMLDivElement>(null);
   const { removeToast } = useToast();
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleClose = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      removeToast(id);
+      onClose?.();
+    }, 300);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const current = toastRef.current;
-      if (current) {
-        current.classList.add("animate-toast-out");
-      }
-      removeToast(id);
+      handleClose();
     }, TOAST_TIMER);
 
     return () => clearTimeout(timer);
@@ -53,12 +58,13 @@ const Toast = ({
       ref={toastRef}
       data-id={id}
       className={cn(
-        `w-[356px] z-50 p-4 rounded-md border-2 border-white/20`,
+        `w-[356px] z-50 p-2 rounded-md border-2 border-white/20 shadow-lg transition-all duration-300 animate-toast-in rounded-lg`,
         {
           "bg-green-500": type === "success",
           "bg-red-500": type === "error",
           "bg-yellow-500": type === "warning",
           "bg-blue-500": type === "info",
+          "animate-toast-out": isExiting,
         },
         containerClassName
       )}
@@ -77,12 +83,9 @@ const Toast = ({
         </div>
         <button
           className="p-2 rounded-full hover:bg-white/20"
-          onClick={() => {
-            removeToast(id);
-            onClose?.();
-          }}
+          onClick={handleClose}
         >
-          <X size={24} color="black" />
+          <X size={24} color="white" />
         </button>
       </div>
     </div>
