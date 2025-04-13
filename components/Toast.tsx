@@ -10,7 +10,8 @@ import type { ToastT, ToastType } from "../types/types";
 import { useToast } from "../providers/ToastProvider";
 import { useEffect, useRef, useState } from "react";
 
-const TOAST_TIMER = 5000;
+const TOAST_TIMER = 3000;
+const ANIMATION_DURATION = 300;
 
 export function getIcon(type: ToastType) {
   switch (type) {
@@ -36,6 +37,44 @@ const Toast = ({
   const toastRef = useRef<HTMLDivElement>(null);
   const { removeToast } = useToast();
   const [isExiting, setIsExiting] = useState(false);
+  const [opacity, setOpacity] = useState(0);
+  const [scale, setScale] = useState(0.8);
+
+  const animateIn = () => {
+    let start: number | null = null;
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = (timestamp - start) / ANIMATION_DURATION;
+
+      if (progress < 1) {
+        setOpacity(progress);
+        setScale(0.8 + 0.2 * progress);
+        requestAnimationFrame(animate);
+      } else {
+        setOpacity(1);
+        setScale(1);
+      }
+    };
+    requestAnimationFrame(animate);
+  };
+
+  const animateOut = () => {
+    let start: number | null = null;
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = (timestamp - start) / ANIMATION_DURATION;
+
+      if (progress < 1) {
+        setOpacity(1 - progress);
+        setScale(1 - 0.2 * progress);
+        requestAnimationFrame(animate);
+      } else {
+        removeToast(id);
+        onClose?.();
+      }
+    };
+    requestAnimationFrame(animate);
+  };
 
   const handleClose = () => {
     setIsExiting(true);
@@ -46,8 +85,9 @@ const Toast = ({
   };
 
   useEffect(() => {
+    animateIn();
     const timer = setTimeout(() => {
-      handleClose();
+      animateOut();
     }, TOAST_TIMER);
 
     return () => clearTimeout(timer);
@@ -57,8 +97,12 @@ const Toast = ({
     <div
       ref={toastRef}
       data-id={id}
+      style={{
+        opacity,
+        transform: `scale(${scale})`,
+      }}
       className={cn(
-        `w-[356px] z-50 p-2 rounded-md border-2 border-white/20 shadow-lg transition-all duration-300 animate-toast-in rounded-lg`,
+        `w-[356px] z-50 p-2 rounded-md border-2 border-white/20 shadow-lg transition-all duration-300 rounded-lg`,
         {
           "bg-green-500": type === "success",
           "bg-red-500": type === "error",
