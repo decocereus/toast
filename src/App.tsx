@@ -40,7 +40,7 @@ function ToastButton({ type }: { readonly type: ToastType }) {
 
   return (
     <button
-      className={cn("px-4 py-2 rounded-md text-white font-medium rounded-lg", {
+      className={cn("px-4 py-2 text-white font-medium rounded-lg", {
         "bg-green-500 hover:bg-green-600": type === "success",
         "bg-red-500 hover:bg-red-600": type === "error",
         "bg-yellow-500 hover:bg-yellow-600": type === "warning",
